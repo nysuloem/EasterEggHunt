@@ -87,7 +87,7 @@ function SelectRole({ onChooseRole, isAdminRoute }) {
   }, [isAdminRoute]);
 
   function handlePapaSubmit() {
-    if (birthYear.trim() === "1960") {
+    if (birthYear.trim() === "1959") {
       setPapaError("");
       onChooseRole("admin");
       return;
