@@ -142,6 +142,11 @@ io.on('connection', (socket) => {
       socket.emit('action-error', { message: 'You cannot dump the final clue.' });
       return;
     }
+    if (recipient.hasUnlockedFinal || recipient.hasFinishedFinal) {
+  return socket.emit("action-error", {
+    message: "Sorry. They are at the final clue. No dumping to them."
+  });
+}
     if (player.dumpsUsed >= MAX_DUMPS) {
       socket.emit('action-error', { message: 'No dumps remaining!' });
       return;
