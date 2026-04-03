@@ -76,11 +76,79 @@ function getCompletion(player) {
 }
 
 function SelectRole({ onChooseRole, isAdminRoute }) {
-  useEffect(() => {
-    if (isAdminRoute) onChooseRole("admin");
-  }, [isAdminRoute, onChooseRole]);
+  const [showPapaPrompt, setShowPapaPrompt] = useState(false);
+  const [birthYear, setBirthYear] = useState("");
+  const [papaError, setPapaError] = useState("");
 
-  if (isAdminRoute) return null;
+  useEffect(() => {
+    if (isAdminRoute) {
+      setShowPapaPrompt(true);
+    }
+  }, [isAdminRoute]);
+
+  function handlePapaSubmit() {
+    if (birthYear.trim() === "1960") {
+      setPapaError("");
+      onChooseRole("admin");
+      return;
+    }
+
+    setPapaError("Nice try. Papa only.");
+  }
+
+  if (showPapaPrompt) {
+    return (
+      <div style={{ maxWidth: 700, margin: "60px auto", fontFamily: "sans-serif", padding: 20 }}>
+        <div style={{ border: "1px solid #ddd", borderRadius: 16, padding: 24, background: "white" }}>
+          <h1>👨‍🦳 Enter as Papa</h1>
+          <p>Enter your year of birth.</p>
+
+          <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
+            <input
+              value={birthYear}
+              onChange={(event) => {
+                setBirthYear(event.target.value);
+                if (papaError) setPapaError("");
+              }}
+              placeholder="Year of birth"
+              inputMode="numeric"
+              style={{
+                flex: 1,
+                minWidth: 180,
+                padding: "12px 14px",
+                borderRadius: 10,
+                border: papaError ? "2px solid #c62828" : "1px solid #bbb",
+                fontSize: 16,
+              }}
+            />
+            <button onClick={handlePapaSubmit}>Continue</button>
+          </div>
+
+          {papaError ? (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderRadius: 10,
+                background: "#fff1f1",
+                border: "1px solid #d66",
+                color: "#8b1e1e",
+                fontWeight: 600,
+              }}
+            >
+              {papaError}
+            </div>
+          ) : null}
+
+          {!isAdminRoute ? (
+            <div style={{ marginTop: 20 }}>
+              <button onClick={() => setShowPapaPrompt(false)}>← Back</button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 700, margin: "60px auto", fontFamily: "sans-serif", padding: 20 }}>
@@ -89,9 +157,9 @@ function SelectRole({ onChooseRole, isAdminRoute }) {
         <p>Choose how you want to enter the hunt.</p>
         <div style={{ display: "grid", gap: 14, marginTop: 20 }}>
           <button onClick={() => onChooseRole("player")} style={{ padding: 16, fontSize: 18 }}>
-            📱 Enter as Player
+            🧒 Enter as Grandchild
           </button>
-          <button onClick={() => onChooseRole("admin")} style={{ padding: 16, fontSize: 18 }}>
+          <button onClick={() => setShowPapaPrompt(true)} style={{ padding: 16, fontSize: 18 }}>
             👨‍🦳 Enter as Papa
           </button>
         </div>
