@@ -47,20 +47,29 @@ io.on('connection', (socket) => {
 
   socket.on('join-player', ({ name }) => {
     const cleanedName = String(name || '').trim();
+
     if (!cleanedName) {
       socket.emit('join-error', { message: 'Please enter your name.' });
       return;
     }
 
     const duplicate = gameState.players.find(
-      (player) => !player.name.startsWith('Player ') && player.name.toLowerCase() === cleanedName.toLowerCase(),
+      (player) =>
+        !player.name.startsWith('Player ') &&
+        player.name.toLowerCase() === cleanedName.toLowerCase(),
     );
+
     if (duplicate) {
-      socket.emit('join-error', { message: `"${cleanedName}" is already taken. Try something new.` });
+      socket.emit('join-error', {
+        message: `"${cleanedName}" is already taken. Try something new.`,
+      });
       return;
     }
 
-    const openSlot = gameState.players.find((player) => player.name.startsWith('Player '));
+    const openSlot = gameState.players.find((player) =>
+      player.name.startsWith('Player '),
+    );
+
     if (!openSlot) {
       socket.emit('join-error', { message: 'All player spots are full.' });
       return;
@@ -79,20 +88,30 @@ io.on('connection', (socket) => {
 
   socket.on('submit-code', ({ playerId, code }) => {
     const player = gameState.players[playerId];
+
     if (!player) {
       socket.emit('action-error', { message: 'Invalid player.' });
       return;
     }
+
     if (!gameState.huntStarted) {
-      socket.emit('action-error', { message: 'The hunt has not started yet. Wait for Papa to start it.' });
+      socket.emit('action-error', {
+        message: 'The hunt has not started yet. Wait for Papa to start it.',
+      });
       return;
     }
+
     if (!player.currentClue) {
-      socket.emit('action-error', { message: 'No clue left for this player.' });
+      socket.emit('action-error', {
+        message: 'No clue left for this player.',
+      });
       return;
     }
+
     if (player.currentClue === COMMON_FINAL_CLUE) {
-      socket.emit('action-error', { message: 'Interpret the emoji clue and go find Papa.' });
+      socket.emit('action-error', {
+        message: 'This clue cannot accept a code.',
+      });
       return;
     }
 
@@ -100,15 +119,23 @@ io.on('connection', (socket) => {
     const cleanedInput = normalizeCodeInput(code);
 
     if (!expectedCode) {
-      socket.emit('action-error', { message: 'No code is mapped to this clue yet.' });
+      socket.emit('action-error', {
+        message: 'No code is mapped to this clue yet.',
+      });
       return;
     }
+
     if (cleanedInput.length !== 3) {
-      socket.emit('action-error', { message: 'Enter the 3-letter code from the egg.' });
+      socket.emit('action-error', {
+        message: 'Enter the 3-letter code from the egg.',
+      });
       return;
     }
+
     if (cleanedInput !== expectedCode) {
-      socket.emit('action-error', { message: `❌ Wrong code for ${player.name}. Try again.` });
+      socket.emit('action-error', {
+        message: `❌ Wrong code for ${player.name}. Try again.`,
+      });
       return;
     }
 
@@ -118,6 +145,7 @@ io.on('connection', (socket) => {
       found: nextPlayers[playerId].found + 1,
       dumpedBy: null,
     };
+
     nextPlayers = advancePlayer(nextPlayers, playerId);
     gameState = { ...gameState, players: nextPlayers };
     emitState(io, `✅ ${player.name} entered the correct code.`);
@@ -126,33 +154,47 @@ io.on('connection', (socket) => {
   socket.on('dump-clue', ({ playerId, targetId }) => {
     const player = gameState.players[playerId];
     const target = gameState.players[targetId];
+
     if (!player || !target) {
       socket.emit('action-error', { message: 'Invalid player.' });
       return;
     }
+
     if (!gameState.huntStarted) {
-      socket.emit('action-error', { message: 'The hunt has not started yet. Wait for Papa to start it.' });
+      socket.emit('action-error', {
+        message: 'The hunt has not started yet. Wait for Papa to start it.',
+      });
       return;
     }
+
     if (!player.currentClue) {
       socket.emit('action-error', { message: 'No clue left to dump.' });
       return;
     }
+
     if (player.currentClue === COMMON_FINAL_CLUE) {
-      socket.emit('action-error', { message: 'You cannot dump the final clue.' });
+      socket.emit('action-error', {
+        message: 'You cannot dump the final clue.',
+      });
       return;
     }
-    if (recipient.hasUnlockedFinal || recipient.hasFinishedFinal) {
-  return socket.emit("action-error", {
-    message: "Sorry. They are at the final clue. No dumping to them."
-  });
-}
+
+    if (target.hasUnlockedFinal || target.hasFinishedFinal) {
+      socket.emit('action-error', {
+        message: 'Sorry. They are at the final clue. No dumping to them.',
+      });
+      return;
+    }
+
     if (player.dumpsUsed >= MAX_DUMPS) {
       socket.emit('action-error', { message: 'No dumps remaining!' });
       return;
     }
+
     if (target.dumpsReceived >= MAX_RECEIVED_DUMPS) {
-      socket.emit('action-error', { message: 'Target already max dumped!' });
+      socket.emit('action-error', {
+        message: 'Target already max dumped!',
+      });
       return;
     }
 
@@ -174,14 +216,20 @@ io.on('connection', (socket) => {
 
     nextPlayers[playerId] = sender;
     nextPlayers[targetId] = recipient;
+
     gameState = { ...gameState, players: advancePlayer(nextPlayers, playerId) };
     emitState(io, `💣 ${sender.name} dumped a clue on ${recipient.name}.`);
   });
 
   socket.on('start-hunt', () => {
-    const joinedCount = gameState.players.filter((entry) => !entry.name.startsWith('Player ')).length;
+    const joinedCount = gameState.players.filter(
+      (entry) => !entry.name.startsWith('Player '),
+    ).length;
+
     if (joinedCount < gameState.players.length) {
-      socket.emit('action-error', { message: `Only ${joinedCount} of ${gameState.players.length} players have joined so far.` });
+      socket.emit('action-error', {
+        message: `Only ${joinedCount} of ${gameState.players.length} players have joined so far.`,
+      });
       return;
     }
 
@@ -200,14 +248,19 @@ io.on('connection', (socket) => {
 
   socket.on('confirm-papa-hug', ({ playerId }) => {
     const target = gameState.players[playerId];
-    const isEligibleForFinalCompletion = target?.hasUnlockedFinal && !target?.hasFinishedFinal;
+    const isEligibleForFinalCompletion =
+      target?.hasUnlockedFinal && !target?.hasFinishedFinal;
 
     if (!isEligibleForFinalCompletion) {
-      socket.emit('action-error', { message: `${target?.name || 'Player'} has not reached the final clue yet.` });
+      socket.emit('action-error', {
+        message: `${target?.name || 'Player'} has not reached the final clue yet.`,
+      });
       return;
     }
 
-    const finishingOrder = gameState.players.filter((entry) => entry.hasFinishedFinal).length + 1;
+    const finishingOrder =
+      gameState.players.filter((entry) => entry.hasFinishedFinal).length + 1;
+
     const nextPlayers = clonePlayers(gameState.players);
     nextPlayers[playerId] = {
       ...nextPlayers[playerId],
@@ -217,6 +270,7 @@ io.on('connection', (socket) => {
     };
 
     gameState = { ...gameState, players: nextPlayers };
+
     const prizeText =
       finishingOrder <= 3
         ? `${target.name} is ${getFinalPlaceLabel(finishingOrder)} and wins mega-candy!`
