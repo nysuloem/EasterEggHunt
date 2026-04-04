@@ -3,7 +3,7 @@ import { socket } from "./socket";
 
 const COMMON_FINAL_CLUE = "🫂👨‍🦳❤️";
 const MAX_DUMPS = 2;
-const PAPA_BIRTH_YEAR = "1960";
+const PAPA_BIRTH_YEAR = "1959";
 
 const CLUE_TEXT = {
   "P1 · Clue 1": "🍳🥘🚪",
@@ -183,6 +183,8 @@ function NotificationBanner({ message, compact = false }) {
 
 function EggColourBanner({ player }) {
   if (!player || player.id == null) return null;
+  if (player.found < 1) return null;
+
   const colour = EGG_COLOURS[player.id];
   if (!colour) return null;
 
@@ -199,7 +201,7 @@ function EggColourBanner({ player }) {
         textAlign: "center",
       }}
     >
-      Your eggs are {colour.name}. Find one bonus egg of this colour hidden randomly on Papa's property.
+      Your eggs are {colour.name}. Find one bonus egg of this colour hidden randomly on Papa&apos;s property.
     </div>
   );
 }
