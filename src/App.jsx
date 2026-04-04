@@ -3,7 +3,7 @@ import { socket } from "./socket";
 
 const COMMON_FINAL_CLUE = "🫂👨‍🦳❤️";
 const MAX_DUMPS = 2;
-const PAPA_BIRTH_YEAR = "1959";
+const PAPA_BIRTH_YEAR = "1960";
 
 const CLUE_TEXT = {
   "P1 · Clue 1": "🍳🥘🚪",
@@ -91,7 +91,10 @@ function buildNotificationStyle(message) {
     text.includes("cannot") ||
     text.includes("full");
 
-  const isCelebration = text.includes("🫂") || text.includes("wins mega-candy") || text.includes("finished in");
+  const isCelebration =
+    text.includes("🫂") ||
+    text.includes("wins mega-candy") ||
+    text.includes("finished in");
 
   if (isCelebration) {
     return {
@@ -127,7 +130,6 @@ function NotificationBanner({ message, compact = false }) {
     <div
       style={{
         marginBottom: compact ? 10 : 12,
-        marginTop: compact ? 0 : 0,
         padding: compact ? 10 : 12,
         borderRadius: 10,
         textAlign: "center",
@@ -143,7 +145,8 @@ function SelectRole({ onChooseRole, isAdminRoute }) {
   const [showPapaPrompt, setShowPapaPrompt] = useState(false);
   const [birthYear, setBirthYear] = useState("");
   const [papaError, setPapaError] = useState("");
-  const papaVerified = sessionStorage.getItem("egg-hunt-papa-verified") === "yes";
+  const papaVerified =
+    sessionStorage.getItem("egg-hunt-papa-verified") === "yes";
 
   useEffect(() => {
     if (isAdminRoute) {
@@ -168,8 +171,22 @@ function SelectRole({ onChooseRole, isAdminRoute }) {
 
   if (showPapaPrompt) {
     return (
-      <div style={{ maxWidth: 700, margin: "60px auto", fontFamily: "sans-serif", padding: 20 }}>
-        <div style={{ border: "1px solid #ddd", borderRadius: 16, padding: 24, background: "white" }}>
+      <div
+        style={{
+          maxWidth: 700,
+          margin: "60px auto",
+          fontFamily: "sans-serif",
+          padding: 20,
+        }}
+      >
+        <div
+          style={{
+            border: "1px solid #ddd",
+            borderRadius: 16,
+            padding: 24,
+            background: "white",
+          }}
+        >
           <h1>👨‍🦳 Enter as Papa</h1>
           <p>Enter your year of birth.</p>
 
@@ -221,15 +238,35 @@ function SelectRole({ onChooseRole, isAdminRoute }) {
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: "60px auto", fontFamily: "sans-serif", padding: 20 }}>
-      <div style={{ border: "1px solid #ddd", borderRadius: 16, padding: 24, background: "white" }}>
+    <div
+      style={{
+        maxWidth: 700,
+        margin: "60px auto",
+        fontFamily: "sans-serif",
+        padding: 20,
+      }}
+    >
+      <div
+        style={{
+          border: "1px solid #ddd",
+          borderRadius: 16,
+          padding: 24,
+          background: "white",
+        }}
+      >
         <h1>🐣 Easter Egg Hunt</h1>
         <p>Choose how you want to enter the hunt.</p>
         <div style={{ display: "grid", gap: 14, marginTop: 20 }}>
-          <button onClick={() => onChooseRole("player")} style={{ padding: 16, fontSize: 18 }}>
+          <button
+            onClick={() => onChooseRole("player")}
+            style={{ padding: 16, fontSize: 18 }}
+          >
             🧒 Enter as Grandchild
           </button>
-          <button onClick={() => setShowPapaPrompt(true)} style={{ padding: 16, fontSize: 18 }}>
+          <button
+            onClick={() => setShowPapaPrompt(true)}
+            style={{ padding: 16, fontSize: 18 }}
+          >
             👨‍🦳 Enter as Papa
           </button>
         </div>
@@ -240,7 +277,9 @@ function SelectRole({ onChooseRole, isAdminRoute }) {
 
 function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
   const [name, setName] = useState("");
-  const joinedPlayers = players.filter((player) => !player.name.startsWith("Player "));
+  const joinedPlayers = players.filter(
+    (player) => !player.name.startsWith("Player ")
+  );
   const joinedCount = joinedPlayers.length;
 
   function handleJoin() {
@@ -248,9 +287,30 @@ function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
   }
 
   return (
-    <div style={{ maxWidth: 760, margin: "40px auto", fontFamily: "sans-serif", padding: 20 }}>
-      <div style={{ border: "1px solid #ddd", borderRadius: 16, padding: 24, background: "white" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+    <div
+      style={{
+        maxWidth: 760,
+        margin: "40px auto",
+        fontFamily: "sans-serif",
+        padding: 20,
+      }}
+    >
+      <div
+        style={{
+          border: "1px solid #ddd",
+          borderRadius: 16,
+          padding: 24,
+          background: "white",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
           <h1 style={{ margin: 0 }}>Enter Your Name</h1>
           <button onClick={onBack}>← Back</button>
         </div>
@@ -260,7 +320,8 @@ function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
         </p>
 
         <p style={{ marginTop: 4, color: "#555" }}>
-          Grandchildren joined: <strong>{joinedCount}</strong> / <strong>{players.length}</strong>
+          Grandchildren joined: <strong>{joinedCount}</strong> /{" "}
+          <strong>{players.length}</strong>
         </p>
 
         <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
@@ -301,7 +362,10 @@ function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
             <h3 style={{ marginBottom: 10 }}>Re-enter as an existing grandchild</h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {joinedPlayers.map((joinedPlayer) => (
-                <button key={joinedPlayer.id} onClick={() => onResumePlayer(joinedPlayer.id)}>
+                <button
+                  key={joinedPlayer.id}
+                  onClick={() => onResumePlayer(joinedPlayer.id)}
+                >
                   {joinedPlayer.name}
                 </button>
               ))}
@@ -325,20 +389,46 @@ function PapaPanel({
   notification,
 }) {
   const players = gameState.players || [];
-  const joinedCount = players.filter((player) => !player.name.startsWith("Player ")).length;
+  const joinedCount = players.filter(
+    (player) => !player.name.startsWith("Player ")
+  ).length;
   const allPlayersJoined = players.length > 0 && joinedCount === players.length;
 
   return (
-    <div style={{ maxWidth: 1100, margin: "20px auto", fontFamily: "sans-serif", padding: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+    <div
+      style={{
+        maxWidth: 1100,
+        margin: "20px auto",
+        fontFamily: "sans-serif",
+        padding: 20,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
         <div>
           <h1 style={{ marginBottom: 6 }}>👨‍🦳 Papa</h1>
           <p style={{ margin: 0 }}>Admin view</p>
         </div>
-        {!window.location.pathname.startsWith("/admin") ? <button onClick={onBack}>← Exit Papa View</button> : null}
+        {!window.location.pathname.startsWith("/admin") ? (
+          <button onClick={onBack}>← Exit Papa View</button>
+        ) : null}
       </div>
 
-      <div style={{ border: "2px solid #d8c38f", borderRadius: 14, padding: 16, marginTop: 20, background: "#fff9ec" }}>
+      <div
+        style={{
+          border: "2px solid #d8c38f",
+          borderRadius: 14,
+          padding: 16,
+          marginTop: 20,
+          background: "#fff9ec",
+        }}
+      >
         <NotificationBanner message={notification} compact />
 
         <p>
@@ -346,7 +436,8 @@ function PapaPanel({
           {" · "}
           Grandchildren joined: <strong>{joinedCount} / {players.length}</strong>
           {" · "}
-          Group status: <strong>{allPlayersJoined ? "All grandchildren joined" : "Waiting for players"}</strong>
+          Group status:{" "}
+          <strong>{allPlayersJoined ? "All grandchildren joined" : "Waiting for players"}</strong>
         </p>
 
         {allPlayersJoined && !gameState.huntStarted ? (
@@ -414,8 +505,8 @@ function PapaPanel({
                   {entry.hasFinishedFinal
                     ? `Finished ${getFinalPlaceLabel(entry.finalPlace)}`
                     : entry.hasUnlockedFinal
-                      ? "Doing Final Clue"
-                      : "Still hunting"}
+                    ? "Doing Final Clue"
+                    : "Still hunting"}
                 </div>
               </div>
 
@@ -464,17 +555,46 @@ function PlayerView({
     });
   }, [players]);
 
+  const playerVisibleNotification =
+    notification === "🐣 Ask the group if they are ready... START HUNT!"
+      ? ""
+      : notification;
+
   return (
-    <div style={{ maxWidth: 1100, margin: "20px auto", fontFamily: "sans-serif", padding: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+    <div
+      style={{
+        maxWidth: 1100,
+        margin: "20px auto",
+        fontFamily: "sans-serif",
+        padding: 20,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
         <div>
           <h1 style={{ marginBottom: 6 }}>🐣 Easter Egg Hunt</h1>
           <p style={{ margin: 0 }}>Grandchild view</p>
         </div>
-        {!window.location.pathname.startsWith("/admin") ? <button onClick={onBack}>← Change Grandchild</button> : null}
+        {!window.location.pathname.startsWith("/admin") ? (
+          <button onClick={onBack}>← Change Grandchild</button>
+        ) : null}
       </div>
 
-      <div style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16, marginTop: 20, marginBottom: 20 }}>
+      <div
+        style={{
+          border: "1px solid #ddd",
+          borderRadius: 12,
+          padding: 16,
+          marginTop: 20,
+          marginBottom: 20,
+        }}
+      >
         <h2>Current Grandchild: {player.name}</h2>
         <p>
           Hunt: <strong>{gameState.huntStarted ? "Started" : "Waiting for Papa"}</strong>
@@ -483,11 +603,26 @@ function PlayerView({
           {" · "}
           Dumps used: <strong>{player.dumpsUsed}</strong> / {MAX_DUMPS}
           {" · "}
-          Final clue: <strong>{player.hasFinishedFinal ? "Finished" : player.hasUnlockedFinal ? "Doing Final Clue" : "Locked"}</strong>
+          Final clue:{" "}
+          <strong>
+            {player.hasFinishedFinal
+              ? "Finished"
+              : player.hasUnlockedFinal
+              ? "Doing Final Clue"
+              : "Locked"}
+          </strong>
         </p>
 
         {!gameState.huntStarted ? (
-          <div style={{ marginTop: 20, padding: 20, borderRadius: 12, background: "#f7f1ff", border: "1px solid #ceb6ff" }}>
+          <div
+            style={{
+              marginTop: 20,
+              padding: 20,
+              borderRadius: 12,
+              background: "#f7f1ff",
+              border: "1px solid #ceb6ff",
+            }}
+          >
             ⏳ Waiting for Papa to start the egg hunt.
           </div>
         ) : player.currentClue ? (
@@ -506,7 +641,7 @@ function PlayerView({
               </div>
             ) : null}
 
-            <NotificationBanner message={notification} />
+            <NotificationBanner message={playerVisibleNotification} />
 
             <div
               style={{
@@ -527,11 +662,21 @@ function PlayerView({
             </div>
 
             {player.currentClue !== COMMON_FINAL_CLUE ? (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 12 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 10,
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
+              >
                 <input
                   type="text"
                   value={enteredCode}
-                  onChange={(event) => setEnteredCode(normalizeCodeInput(event.target.value))}
+                  onChange={(event) =>
+                    setEnteredCode(normalizeCodeInput(event.target.value))
+                  }
                   placeholder="Enter 3-letter code"
                   maxLength={3}
                   style={{
@@ -562,14 +707,19 @@ function PlayerView({
           </div>
         )}
 
-        {gameState.huntStarted && player.currentClue && player.currentClue !== COMMON_FINAL_CLUE ? (
+        {gameState.huntStarted &&
+        player.currentClue &&
+        player.currentClue !== COMMON_FINAL_CLUE ? (
           <>
             <h3>💣 Dump This Clue</h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
               {players.map((otherPlayer) => {
                 if (otherPlayer.id === player.id) return null;
                 return (
-                  <button key={otherPlayer.id} onClick={() => onDumpClue(otherPlayer.id)}>
+                  <button
+                    key={otherPlayer.id}
+                    onClick={() => onDumpClue(otherPlayer.id)}
+                  >
                     Dump to {otherPlayer.name}
                   </button>
                 );
@@ -584,8 +734,12 @@ function PlayerView({
         {leaderboard.map((entry) => (
           <li key={entry.id}>
             {entry.name}: {entry.found} / {entry.total} ({getCompletion(entry)}%)
-            {entry.hasUnlockedFinal && !entry.hasFinishedFinal ? " · Doing Final Clue" : ""}
-            {entry.hasFinishedFinal ? ` · Finished ${getFinalPlaceLabel(entry.finalPlace)}` : ""}
+            {entry.hasUnlockedFinal && !entry.hasFinishedFinal
+              ? " · Doing Final Clue"
+              : ""}
+            {entry.hasFinishedFinal
+              ? ` · Finished ${getFinalPlaceLabel(entry.finalPlace)}`
+              : ""}
           </li>
         ))}
       </ul>
@@ -612,7 +766,11 @@ export default function App() {
 
   const isAdminRoute = window.location.pathname.startsWith("/admin");
   const players = gameState.players || [];
-  const player = playerId == null ? null : players.find((entry) => entry.id === playerId) || null;
+  const player =
+    playerId == null
+      ? null
+      : players.find((entry) => entry.id === playerId) || null;
+
   const notification = actionError || joinError || gameState.notification || "";
 
   useEffect(() => {
@@ -620,7 +778,9 @@ export default function App() {
       setGameState(nextState);
 
       if (playerId != null) {
-        const existingPlayer = nextState.players?.find((entry) => entry.id === playerId);
+        const existingPlayer = nextState.players?.find(
+          (entry) => entry.id === playerId
+        );
         if (!existingPlayer || existingPlayer.name.startsWith("Player ")) {
           setPlayerId(null);
           localStorage.removeItem("egg-hunt-player-id");
@@ -653,7 +813,8 @@ export default function App() {
 
   useEffect(() => {
     if (isAdminRoute) {
-      const papaVerified = sessionStorage.getItem("egg-hunt-papa-verified") === "yes";
+      const papaVerified =
+        sessionStorage.getItem("egg-hunt-papa-verified") === "yes";
       if (papaVerified) {
         setRole("admin");
       }
