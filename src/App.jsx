@@ -821,6 +821,26 @@ export default function App() {
     }
   }, [isAdminRoute]);
 
+  useEffect(() => {
+    if (!actionError) return;
+
+    const timer = setTimeout(() => {
+      setActionError("");
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [actionError]);
+
+  useEffect(() => {
+    if (!joinError) return;
+
+    const timer = setTimeout(() => {
+      setJoinError("");
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [joinError]);
+
   function clearTransientMessages() {
     setJoinError("");
     setActionError("");
