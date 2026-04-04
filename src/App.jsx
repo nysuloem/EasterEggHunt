@@ -49,6 +49,45 @@ const CLUE_TEXT = {
   "P6 · Clue 6": "🍽️🚿💦",
 };
 
+const EGG_COLOURS = {
+  0: {
+    name: "Pink",
+    background: "#ffd6e7",
+    border: "#e88bb2",
+    color: "#7a224a",
+  },
+  1: {
+    name: "Orange",
+    background: "#ffe2bf",
+    border: "#f0a24d",
+    color: "#7a4100",
+  },
+  2: {
+    name: "Green",
+    background: "#dff5df",
+    border: "#74b874",
+    color: "#1f5c1f",
+  },
+  3: {
+    name: "Blue",
+    background: "#d9e9ff",
+    border: "#6c9fe8",
+    color: "#1f4f8a",
+  },
+  4: {
+    name: "Yellow",
+    background: "#fff6bf",
+    border: "#d9c14d",
+    color: "#6a5600",
+  },
+  5: {
+    name: "Purple",
+    background: "#ecd9ff",
+    border: "#a57ad8",
+    color: "#5b2c8f",
+  },
+};
+
 function normalizeCodeInput(value) {
   return String(value || "")
     .toUpperCase()
@@ -89,7 +128,8 @@ function buildNotificationStyle(message) {
     text.includes("Only ") ||
     text.includes("No clue") ||
     text.includes("cannot") ||
-    text.includes("full");
+    text.includes("full") ||
+    text.includes("allergy-safe slot");
 
   const isCelebration =
     text.includes("🫂") ||
@@ -137,6 +177,29 @@ function NotificationBanner({ message, compact = false }) {
       }}
     >
       {message}
+    </div>
+  );
+}
+
+function EggColourBanner({ player }) {
+  if (!player || player.id == null) return null;
+  const colour = EGG_COLOURS[player.id];
+  if (!colour) return null;
+
+  return (
+    <div
+      style={{
+        marginBottom: 12,
+        padding: 12,
+        borderRadius: 10,
+        background: colour.background,
+        border: `1px solid ${colour.border}`,
+        color: colour.color,
+        fontWeight: 700,
+        textAlign: "center",
+      }}
+    >
+      Your eggs are {colour.name}. Find one bonus egg of this colour hidden randomly on Papa's property.
     </div>
   );
 }
@@ -277,13 +340,17 @@ function SelectRole({ onChooseRole, isAdminRoute }) {
 
 function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
   const [name, setName] = useState("");
+  const [greenDyeAllergy, setGreenDyeAllergy] = useState("no");
   const joinedPlayers = players.filter(
     (player) => !player.name.startsWith("Player ")
   );
   const joinedCount = joinedPlayers.length;
 
   function handleJoin() {
-    onJoin(name.trim());
+    onJoin({
+      name: name.trim(),
+      greenDyeAllergy: greenDyeAllergy === "yes",
+    });
   }
 
   return (
@@ -316,7 +383,7 @@ function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
         </div>
 
         <p style={{ marginTop: 12 }}>
-          Enter your name and the app will automatically assign you the next open spot.
+          Enter your name and the app will automatically assign you the correct spot.
         </p>
 
         <p style={{ marginTop: 4, color: "#555" }}>
@@ -324,20 +391,54 @@ function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
           <strong>{players.length}</strong>
         </p>
 
-        <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
+        <div style={{ display: "grid", gap: 12, marginTop: 20 }}>
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Your name"
             style={{
-              flex: 1,
-              minWidth: 220,
               padding: "12px 14px",
               borderRadius: 10,
               border: joinError ? "2px solid #c62828" : "1px solid #bbb",
               fontSize: 16,
             }}
           />
+
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid #ddd",
+              background: "#fafafa",
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>
+              Do you have a green food dye allergy?
+            </div>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  type="radio"
+                  name="greenDyeAllergy"
+                  value="yes"
+                  checked={greenDyeAllergy === "yes"}
+                  onChange={() => setGreenDyeAllergy("yes")}
+                />
+                Yes
+              </label>
+              <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  type="radio"
+                  name="greenDyeAllergy"
+                  value="no"
+                  checked={greenDyeAllergy === "no"}
+                  onChange={() => setGreenDyeAllergy("no")}
+                />
+                No
+              </label>
+            </div>
+          </div>
+
           <button onClick={handleJoin}>Join Hunt</button>
         </div>
 
@@ -642,6 +743,7 @@ function PlayerView({
             ) : null}
 
             <NotificationBanner message={playerVisibleNotification} />
+            <EggColourBanner player={player} />
 
             <div
               style={{
@@ -846,9 +948,9 @@ export default function App() {
     setActionError("");
   }
 
-  function handleJoin(name) {
+  function handleJoin({ name, greenDyeAllergy }) {
     clearTransientMessages();
-    socket.emit("join-player", { name });
+    socket.emit("join-player", { name, greenDyeAllergy });
   }
 
   function handleResumePlayer(existingPlayerId) {
