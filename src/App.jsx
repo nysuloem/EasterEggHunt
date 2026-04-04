@@ -449,21 +449,37 @@ function PlayerView({
               </div>
             ) : null}
 
-            <div
-              style={{
-                fontSize: 36,
-                margin: "20px 0",
-                padding: 20,
-                borderRadius: 12,
-                background: "#f5f5f5",
-                minHeight: 100,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {CLUE_TEXT[normalizeClueKey(player.currentClue)] || player.currentClue}
-            </div>
+           {notification ? (
+  <div
+    style={{
+      marginBottom: 12,
+      padding: 12,
+      borderRadius: 10,
+      background: "#fff4cc",
+      border: "1px solid #e8cf7a",
+      fontWeight: 600,
+      textAlign: "center",
+    }}
+  >
+    {notification}
+  </div>
+) : null}
+
+<div
+  style={{
+    fontSize: 36,
+    margin: "20px 0",
+    padding: 20,
+    borderRadius: 12,
+    background: "#f5f5f5",
+    minHeight: 100,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  {CLUE_TEXT[normalizeClueKey(player.currentClue)] || player.currentClue}
+</div>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 12 }}>
               <input
@@ -527,22 +543,7 @@ function PlayerView({
         ))}
       </ul>
 
-      {notification ? (
-        <div
-          style={{
-            marginTop: 16,
-            padding: 16,
-            borderRadius: 12,
-            background: notification.includes("🫂") ? "#fff4cc" : "#eef",
-            border: notification.includes("🫂") ? "2px solid gold" : "1px solid #99f",
-            fontSize: notification.includes("🫂") ? 24 : 16,
-            fontWeight: notification.includes("🫂") ? 700 : 400,
-            textAlign: "center",
-          }}
-        >
-          {notification}
-        </div>
-      ) : null}
+      
     </div>
   );
 }
