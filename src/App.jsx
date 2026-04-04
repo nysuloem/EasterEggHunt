@@ -3,6 +3,7 @@ import { socket } from "./socket";
 
 const COMMON_FINAL_CLUE = "🫂👨‍🦳❤️";
 const MAX_DUMPS = 2;
+const PAPA_BIRTH_YEAR = "1960";
 
 const CLUE_TEXT = {
   "P1 · Clue 1": "🍳🥘🚪",
@@ -75,19 +76,88 @@ function getCompletion(player) {
   return Math.round((player.found / totalWithFinal) * 100);
 }
 
+function buildNotificationStyle(message) {
+  const text = String(message || "");
+  const isError =
+    text.includes("Wrong code") ||
+    text.includes("No dumps") ||
+    text.includes("Sorry. They are at the final clue") ||
+    text.includes("Invalid") ||
+    text.includes("Please enter") ||
+    text.includes("already taken") ||
+    text.includes("has not started") ||
+    text.includes("Only ") ||
+    text.includes("No clue") ||
+    text.includes("cannot") ||
+    text.includes("full");
+
+  const isCelebration = text.includes("🫂") || text.includes("wins mega-candy") || text.includes("finished in");
+
+  if (isCelebration) {
+    return {
+      background: "#fff4cc",
+      border: "2px solid gold",
+      color: "#5c4a00",
+      fontWeight: 700,
+    };
+  }
+
+  if (isError) {
+    return {
+      background: "#ffe5e5",
+      border: "1px solid #d66",
+      color: "#8b1e1e",
+      fontWeight: 700,
+    };
+  }
+
+  return {
+    background: "#fff4cc",
+    border: "1px solid #e8cf7a",
+    color: "#5c4a00",
+    fontWeight: 600,
+  };
+}
+
+function NotificationBanner({ message, compact = false }) {
+  if (!message) return null;
+  const styleBits = buildNotificationStyle(message);
+
+  return (
+    <div
+      style={{
+        marginBottom: compact ? 10 : 12,
+        marginTop: compact ? 0 : 0,
+        padding: compact ? 10 : 12,
+        borderRadius: 10,
+        textAlign: "center",
+        ...styleBits,
+      }}
+    >
+      {message}
+    </div>
+  );
+}
+
 function SelectRole({ onChooseRole, isAdminRoute }) {
   const [showPapaPrompt, setShowPapaPrompt] = useState(false);
   const [birthYear, setBirthYear] = useState("");
   const [papaError, setPapaError] = useState("");
+  const papaVerified = sessionStorage.getItem("egg-hunt-papa-verified") === "yes";
 
   useEffect(() => {
     if (isAdminRoute) {
-      setShowPapaPrompt(true);
+      if (papaVerified) {
+        onChooseRole("admin");
+      } else {
+        setShowPapaPrompt(true);
+      }
     }
-  }, [isAdminRoute]);
+  }, [isAdminRoute, onChooseRole, papaVerified]);
 
   function handlePapaSubmit() {
-    if (birthYear.trim() === "1959") {
+    if (birthYear.trim() === PAPA_BIRTH_YEAR) {
+      sessionStorage.setItem("egg-hunt-papa-verified", "yes");
       setPapaError("");
       onChooseRole("admin");
       return;
@@ -190,7 +260,7 @@ function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
         </p>
 
         <p style={{ marginTop: 4, color: "#555" }}>
-          Players joined: <strong>{joinedCount}</strong> / <strong>{players.length}</strong>
+          Grandchildren joined: <strong>{joinedCount}</strong> / <strong>{players.length}</strong>
         </p>
 
         <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
@@ -228,7 +298,7 @@ function PlayerJoin({ players, onJoin, onResumePlayer, onBack, joinError }) {
 
         {joinedPlayers.length ? (
           <div style={{ marginTop: 24 }}>
-            <h3 style={{ marginBottom: 10 }}>Re-enter as an existing player</h3>
+            <h3 style={{ marginBottom: 10 }}>Re-enter as an existing grandchild</h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {joinedPlayers.map((joinedPlayer) => (
                 <button key={joinedPlayer.id} onClick={() => onResumePlayer(joinedPlayer.id)}>
@@ -252,6 +322,7 @@ function PapaPanel({
   onConfirmReset,
   onCancelReset,
   onConfirmPapaHug,
+  notification,
 }) {
   const players = gameState.players || [];
   const joinedCount = players.filter((player) => !player.name.startsWith("Player ")).length;
@@ -268,12 +339,14 @@ function PapaPanel({
       </div>
 
       <div style={{ border: "2px solid #d8c38f", borderRadius: 14, padding: 16, marginTop: 20, background: "#fff9ec" }}>
+        <NotificationBanner message={notification} compact />
+
         <p>
           Hunt status: <strong>{gameState.huntStarted ? "Started" : "Waiting to start"}</strong>
           {" · "}
-          Players joined: <strong>{joinedCount} / {players.length}</strong>
+          Grandchildren joined: <strong>{joinedCount} / {players.length}</strong>
           {" · "}
-          Group status: <strong>{allPlayersJoined ? "All players joined" : "Waiting for players"}</strong>
+          Group status: <strong>{allPlayersJoined ? "All grandchildren joined" : "Waiting for players"}</strong>
         </p>
 
         {allPlayersJoined && !gameState.huntStarted ? (
@@ -286,7 +359,7 @@ function PapaPanel({
               marginBottom: 14,
             }}
           >
-            ✅ All 6 players are in. Ask the group if they are ready, then press Start Egg Hunt.
+            ✅ All 6 grandchildren are in. Ask the group if they are ready, then press Start Egg Hunt.
           </div>
         ) : null}
 
@@ -316,7 +389,7 @@ function PapaPanel({
           </div>
         ) : null}
 
-        <h3>Players and Final Hug Confirmation</h3>
+        <h3>Grandchildren and Final Hug Confirmation</h3>
         <div style={{ display: "grid", gap: 10 }}>
           {players.map((entry) => (
             <div
@@ -396,13 +469,13 @@ function PlayerView({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <div>
           <h1 style={{ marginBottom: 6 }}>🐣 Easter Egg Hunt</h1>
-          <p style={{ margin: 0 }}>Player view</p>
+          <p style={{ margin: 0 }}>Grandchild view</p>
         </div>
-        {!window.location.pathname.startsWith("/admin") ? <button onClick={onBack}>← Change Player</button> : null}
+        {!window.location.pathname.startsWith("/admin") ? <button onClick={onBack}>← Change Grandchild</button> : null}
       </div>
 
       <div style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16, marginTop: 20, marginBottom: 20 }}>
-        <h2>Current Player: {player.name}</h2>
+        <h2>Current Grandchild: {player.name}</h2>
         <p>
           Hunt: <strong>{gameState.huntStarted ? "Started" : "Waiting for Papa"}</strong>
           {" · "}
@@ -416,22 +489,6 @@ function PlayerView({
         {!gameState.huntStarted ? (
           <div style={{ marginTop: 20, padding: 20, borderRadius: 12, background: "#f7f1ff", border: "1px solid #ceb6ff" }}>
             ⏳ Waiting for Papa to start the egg hunt.
-          </div>
-        ) : player.currentClue === COMMON_FINAL_CLUE ? (
-          <div
-            style={{
-              fontSize: 36,
-              margin: "20px 0",
-              padding: 24,
-              borderRadius: 12,
-              background: "#f5f5f5",
-              minHeight: 100,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {player.currentClue}
           </div>
         ) : player.currentClue ? (
           <>
@@ -449,57 +506,47 @@ function PlayerView({
               </div>
             ) : null}
 
-           {notification ? (
-  <div
-    style={{
-      marginBottom: 12,
-      padding: 12,
-      borderRadius: 10,
-      background: "#fff4cc",
-      border: "1px solid #e8cf7a",
-      fontWeight: 600,
-      textAlign: "center",
-    }}
-  >
-    {notification}
-  </div>
-) : null}
+            <NotificationBanner message={notification} />
 
-<div
-  style={{
-    fontSize: 36,
-    margin: "20px 0",
-    padding: 20,
-    borderRadius: 12,
-    background: "#f5f5f5",
-    minHeight: 100,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  }}
->
-  {CLUE_TEXT[normalizeClueKey(player.currentClue)] || player.currentClue}
-</div>
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 12 }}>
-              <input
-                type="text"
-                value={enteredCode}
-                onChange={(event) => setEnteredCode(normalizeCodeInput(event.target.value))}
-                placeholder="Enter 3-letter code"
-                maxLength={3}
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid #bbb",
-                  fontSize: 18,
-                  width: 180,
-                  textTransform: "uppercase",
-                  letterSpacing: 2,
-                }}
-              />
-              <button onClick={onSubmitCode}>🔐 Submit Code</button>
+            <div
+              style={{
+                fontSize: 36,
+                margin: "20px 0",
+                padding: 20,
+                borderRadius: 12,
+                background: "#f5f5f5",
+                minHeight: 100,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {player.currentClue === COMMON_FINAL_CLUE
+                ? player.currentClue
+                : CLUE_TEXT[normalizeClueKey(player.currentClue)] || player.currentClue}
             </div>
+
+            {player.currentClue !== COMMON_FINAL_CLUE ? (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 12 }}>
+                <input
+                  type="text"
+                  value={enteredCode}
+                  onChange={(event) => setEnteredCode(normalizeCodeInput(event.target.value))}
+                  placeholder="Enter 3-letter code"
+                  maxLength={3}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    border: "1px solid #bbb",
+                    fontSize: 18,
+                    width: 180,
+                    textTransform: "uppercase",
+                    letterSpacing: 2,
+                  }}
+                />
+                <button onClick={onSubmitCode}>🔐 Submit Code</button>
+              </div>
+            ) : null}
           </>
         ) : (
           <div
@@ -542,14 +589,17 @@ function PlayerView({
           </li>
         ))}
       </ul>
-
-      
     </div>
   );
 }
 
 export default function App() {
-  const [gameState, setGameState] = useState({ huntStarted: false, players: [], notification: "" });
+  const [gameState, setGameState] = useState({
+    huntStarted: false,
+    players: [],
+    notification: "",
+  });
+
   const [role, setRole] = useState(null);
   const [playerId, setPlayerId] = useState(() => {
     const saved = localStorage.getItem("egg-hunt-player-id");
@@ -602,28 +652,35 @@ export default function App() {
   }, [playerId]);
 
   useEffect(() => {
-    if (isAdminRoute) setRole("admin");
+    if (isAdminRoute) {
+      const papaVerified = sessionStorage.getItem("egg-hunt-papa-verified") === "yes";
+      if (papaVerified) {
+        setRole("admin");
+      }
+    }
   }, [isAdminRoute]);
 
-  function handleJoin(name) {
+  function clearTransientMessages() {
     setJoinError("");
     setActionError("");
+  }
+
+  function handleJoin(name) {
+    clearTransientMessages();
     socket.emit("join-player", { name });
   }
 
   function handleResumePlayer(existingPlayerId) {
+    clearTransientMessages();
     setPlayerId(existingPlayerId);
     localStorage.setItem("egg-hunt-player-id", String(existingPlayerId));
-    setJoinError("");
-    setActionError("");
   }
 
   function handleBack() {
     if (isAdminRoute) return;
     setRole(null);
     setEnteredCode("");
-    setJoinError("");
-    setActionError("");
+    clearTransientMessages();
   }
 
   function handleSubmitCode() {
@@ -657,6 +714,9 @@ export default function App() {
     socket.emit("reset-hunt");
     setPlayerId(null);
     localStorage.removeItem("egg-hunt-player-id");
+    if (!isAdminRoute) {
+      setRole(null);
+    }
   }
 
   function handleConfirmPapaHug(targetPlayerId) {
@@ -679,6 +739,7 @@ export default function App() {
         onConfirmReset={handleConfirmReset}
         onCancelReset={handleCancelReset}
         onConfirmPapaHug={handleConfirmPapaHug}
+        notification={notification}
       />
     );
   }
