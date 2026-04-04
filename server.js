@@ -45,8 +45,9 @@ app.use(express.static(path.join(__dirname, 'dist')));
 io.on('connection', (socket) => {
   socket.emit('state-updated', gameState);
 
-  socket.on('join-player', ({ name }) => {
+  socket.on('join-player', ({ name, greenDyeAllergy }) => {
     const cleanedName = String(name || '').trim();
+    const hasGreenDyeAllergy = Boolean(greenDyeAllergy);
 
     if (!cleanedName) {
       socket.emit('join-error', { message: 'Please enter your name.' });
@@ -66,9 +67,25 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const openSlot = gameState.players.find((player) =>
-      player.name.startsWith('Player '),
-    );
+    let openSlot = null;
+
+    if (hasGreenDyeAllergy) {
+      const playerOne = gameState.players[0];
+      if (playerOne && playerOne.name.startsWith('Player ')) {
+        openSlot = playerOne;
+      } else {
+        socket.emit('join-error', {
+          message: 'Sorry — the allergy-safe slot is already taken. Please get Papa.',
+        });
+        return;
+      }
+    } else {
+      openSlot =
+        gameState.players.find(
+          (player) => player.id !== 0 && player.name.startsWith('Player '),
+        ) ||
+        gameState.players.find((player) => player.name.startsWith('Player '));
+    }
 
     if (!openSlot) {
       socket.emit('join-error', { message: 'All player spots are full.' });
